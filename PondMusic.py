@@ -68,13 +68,16 @@ class PondTuplet(PondMelody):
 
 
 class PondNote(PondObject):
-    def __init__(self, pitch, duration="4", articulation="", score_marks="",
-                 octave=4, tie=""):
+    def __init__(self, pitch, duration="4", articulation="", dynamic="",
+                 octave=4, tie=False, expression=""):
         self.pitch = PondPitch(pitch, octave)
         self.duration = str(duration)
         self.articulation = articulation
-        self.score_marks = score_marks
+        self.dynamic = dynamic
         self.tie = "~" if tie else ""
+        self.expressions = expression
+        self.pre_marks = ""
+        self.post_marks = ""
 
     def transpose(self, steps):
         self.pitch.transpose(steps)
@@ -83,8 +86,25 @@ class PondNote(PondObject):
         return self.pitch.as_string()
 
     def as_string(self):
-        return (self.pitch_data() + self.duration +
-                self.articulation + self.tie + self.score_marks)
+        return (self.pre_marks + self.pitch_data() + self.duration +
+                self.articulation + self.tie + self.dynamic + self.post_marks)
+
+    def trill_marks(self, begin=True, pitched=None, clear=False, relative=True):
+        if clear:
+            self.pre_marks = ""
+            self.post_marks = ""
+            return
+        trill_mark = "\\startTrillSpan " if begin else "\\stopTrillSpan "
+        if isinstance(pitched, PondPitch):
+            self.pre_marks += "\\pitchedTrill "
+            self.post_marks += trill_mark + str(pitched)
+        elif isinstance(pitched, str):
+            octave = self.pitch.octave if relative else 4
+            pitched = PondPitch(pitched, octave)
+            self.pre_marks += "\\pitchedTrill "
+            self.post_marks += trill_mark + str(pitched)
+        else:
+            self.pre_marks += trill_mark
 
 
 class PondChord(PondNote):
@@ -115,7 +135,7 @@ class PondPitch(PondObject):
 
     def __init__(self, pitch, octave=4):
         if isinstance(pitch, str):
-            pitch = self.from_string(pitch)
+            pitch = self.__init_from_string(pitch)
         self.__pitch = pitch
         self.__octave = octave
 
@@ -133,14 +153,19 @@ class PondPitch(PondObject):
             self.__pitch += 12
             self.__octave -= 1
 
+    @property
+    def octave(self):
+        return self.__octave
+
     def make_rest(self):
         self.__pitch = -1
 
     def make_pitch(self):
         self.__pitch = 0
 
-    def from_string(self, string):
-        for pitch, names in self.pitch_names.items():
+    @classmethod
+    def __init_from_string(cls, string):
+        for pitch, names in cls.pitch_names.items():
             if string in names:
                 return pitch
         raise ValueError(f"The note name {string} is currently not supported by PyPond")
@@ -165,5 +190,3 @@ class PondPitch(PondObject):
 
     def as_string(self):
         return self.note_string() + self.octave_string()
-
-
