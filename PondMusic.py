@@ -35,6 +35,15 @@ class PondMelody(PondObject):
     def render_fragments(self):
         return map(str, self.fragments)
 
+    def ordered_notes(self):
+        ordered = []
+        for item in self.fragments:
+            if isinstance(item, PondNote):
+                ordered.append(item)
+            else:
+                ordered.extend(item.ordered_notes())
+        return ordered
+
     def as_string(self):
         return f"{{{' '.join(self.render_fragments())}}}"
 
@@ -63,7 +72,7 @@ class PondNote(PondObject):
                  octave=4, tie=""):
         self.pitch = PondPitch(pitch, octave)
         self.duration = str(duration)
-        self.articulation = "-" + articulation if articulation else ""
+        self.articulation = articulation
         self.score_marks = score_marks
         self.tie = "~" if tie else ""
 
