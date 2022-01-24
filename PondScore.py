@@ -1,4 +1,4 @@
-from PondCommandFolder.PondCommandCore import PondAbstractCommand
+from PondCommand import PondAbstractCommand
 from PondCore import PondObject
 
 

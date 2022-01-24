@@ -77,5 +77,3 @@ class PondPaper(PondAbstractCommand):
 
     def as_string(self):
         return f"\\{self.tag_name} {{{self.get_margins()}}}"
-
-
