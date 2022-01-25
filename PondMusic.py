@@ -94,7 +94,9 @@ class PondNote(PondObject):
             self.pre_marks = ""
             self.post_marks = ""
             return
-        trill_mark = "\\startTrillSpan " if begin else "\\stopTrillSpan "
+        if not begin:
+            self.post_marks += "\\stopTrillSpan"
+        trill_mark = "\\startTrillSpan "
         if isinstance(pitched, PondPitch):
             self.pre_marks += "\\pitchedTrill "
             self.post_marks += trill_mark + str(pitched)
