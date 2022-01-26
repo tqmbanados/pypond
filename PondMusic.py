@@ -133,7 +133,7 @@ class PondPitch(PondObject):
                    }
     default_key_data = [1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0]
 
-    def __init__(self, pitch, octave=4):
+    def __init__(self, pitch=0, octave=4):
         if isinstance(pitch, str):
             pitch = self.__init_from_string(pitch)
         self.__pitch = pitch
