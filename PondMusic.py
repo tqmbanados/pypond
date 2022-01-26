@@ -77,34 +77,39 @@ class PondNote(PondObject):
         self.tie = "~" if tie else ""
         self.expressions = expression
         self.pre_marks = ""
-        self.post_marks = ""
+        self.post_marks = []
+        self.auxiliary_pitches = {}
 
     def transpose(self, steps):
         self.pitch.transpose(steps)
+        for pitch in self.auxiliary_pitches.values():
+            pitch.transpose(steps)
 
     def pitch_string(self):
         return self.pitch.as_string()
 
     def as_string(self):
         return (self.pre_marks + self.pitch_string() + self.duration +
-                self.articulation + self.tie + self.dynamic + self.post_marks)
+                self.articulation + self.tie + self.dynamic +
+                ' '.join(map(str, self.post_marks)))
 
     def trill_marks(self, begin=True, pitched=None, clear=False, relative=True):
         if clear:
             self.pre_marks = ""
-            self.post_marks = ""
+            self.post_marks = []
             return
         trill_mark = "\\startTrillSpan " if begin else "\\stopTrillSpan "
         if isinstance(pitched, PondPitch):
             self.pre_marks += "\\pitchedTrill "
-            self.post_marks += trill_mark + str(pitched)
-        elif isinstance(pitched, str):
+            self.post_marks += [trill_mark, pitched]
+        elif isinstance(pitched, (str, int)):
             octave = self.pitch.octave if relative else 4
             pitched = PondPitch(pitched, octave)
             self.pre_marks += "\\pitchedTrill "
-            self.post_marks += trill_mark + str(pitched)
+            self.auxiliary_pitches["trill"] = pitched
+            self.post_marks += [trill_mark, pitched]
         else:
-            self.post_marks += trill_mark
+            self.post_marks += [trill_mark]
 
 
 class PondChord(PondNote):
