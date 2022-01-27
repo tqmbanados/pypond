@@ -121,6 +121,65 @@ class PondChord(PondNote):
         return f"<{' '.join(map(str, self.pitches))}>"
 
 
+class PondNoteGroup(PondObject):
+    def __init__(self, duration=4, main_pitches=None, articulation="",
+                 dynamic="", tie=False, expression=""):
+        self.main_pitches = main_pitches or None  # More than one element makes a chord.
+        self.__auxiliary_pitches = {}
+        self.duration = str(duration)
+        self.articulation = articulation
+        self.dynamic = dynamic
+        self.tie = "~" if tie else ""
+        self.expressions = expression
+        self.format_string = "{pitch_data}{non_pitch_data}{trill}"
+
+    def all_pitches(self):
+        for pitch in self.main_pitches:
+            yield pitch
+        for pitch in self.__auxiliary_pitches.values():
+            yield pitch
+
+    def non_pitch_data(self):
+        return self.duration + self.articulation + self.tie + self.dynamic
+
+    def pitch_data(self):
+        if len(self.main_pitches) > 1:
+            return str(self.main_pitches[0])
+        else:
+            return f"<{' '.join(map(str, self.main_pitches))}>"
+
+    def transpose(self, steps):
+        for pitch in self.all_pitches():
+            pitch.transpose(steps)
+
+    def add_trill(self, pitch, octave=4, relative=False):
+        if not isinstance(pitch, PondPitch):
+            octave = self.main_pitches[0].octave if relative else octave
+            pitch = PondPitch(pitch, octave)
+        self.__auxiliary_pitches['trill'] = pitch
+        self.format_string = ("\\pitchedTrill {pitch_data}{non_pitch_data} "
+                              "\\startTrillSpan {trill}")
+
+    def remove_trill(self):
+        self.format_string = "{pitch_data}{non_pitch_data}{trill}"
+        self.__auxiliary_pitches.pop('trill')
+
+    def end_trill(self):
+        self.format_string = "{pitch_data}{non_pitch_data}{trill} \\stopTrillSpan"
+
+    def from_auxiliary(self, key):
+        if key in self.__auxiliary_pitches:
+            return str(self.__auxiliary_pitches[key])
+        else:
+            return ""
+
+    def as_string(self):
+        string = self.format_string.format(pitch_data=self.pitch_data(),
+                                           non_pitch_data=self.non_pitch_data(),
+                                           trill=self.from_auxiliary('trill'))
+        return string
+
+
 class PondPitch(PondObject):
     pitch_names = {0: ["bis", "c"],
                    1: ["des", "cis"],
@@ -141,6 +200,9 @@ class PondPitch(PondObject):
     def __init__(self, pitch=0, octave=4):
         if isinstance(pitch, str):
             pitch = self.__init_from_string(pitch)
+        if isinstance(pitch, tuple):
+            pitch = pitch[0]
+            octave = pitch[1]
         self.__pitch = pitch
         self.__octave = octave
 
@@ -199,3 +261,9 @@ class PondPitch(PondObject):
 
     def as_string(self):
         return self.note_string() + self.octave_string()
+    
+    @classmethod
+    def from_absolute_int(cls, pitch_value):
+        new_pitch = PondPitch()
+        new_pitch.transpose(pitch_value)
+        return new_pitch
