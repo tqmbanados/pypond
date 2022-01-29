@@ -123,13 +123,13 @@ class PondChord(PondNote):
 
 class PondNoteGroup(PondObject):
     def __init__(self, duration=4, main_pitches=None, articulation="",
-                 dynamic="", tie=False, expression=""):
-        self.main_pitches = main_pitches or None  # More than one element makes a chord.
+                 dynamic="", tie_data=None, expression=""):
+        self.main_pitches = main_pitches or []  # More than one element makes a chord.
         self.__auxiliary_pitches = {}
         self.duration = str(duration)
         self.articulation = articulation
         self.dynamic = dynamic
-        self.tie = "~" if tie else ""
+        self.tie_data = tie_data or [False for _ in range(len(main_pitches))]
         self.expressions = expression
         self.format_string = "{pitch_data}{non_pitch_data}{trill}"
 
@@ -140,13 +140,22 @@ class PondNoteGroup(PondObject):
             yield pitch
 
     def non_pitch_data(self):
-        return self.duration + self.articulation + self.tie + self.dynamic
+        return self.duration + self.articulation + self.dynamic
 
     def pitch_data(self):
         if len(self.main_pitches) > 1:
             return str(self.main_pitches[0])
         else:
-            return f"<{' '.join(map(str, self.main_pitches))}>"
+            return f"<{' '.join(self.string_main_pitches())}>"
+
+    def string_main_pitches(self):
+        for idx in range(self.main_pitches):
+            pitch = self.main_pitches[idx]
+            try:
+                tie = "~" if self.tie_data[idx] else ""
+            except IndexError:
+                tie = ""
+            yield str(pitch) + tie
 
     def transpose(self, steps):
         for pitch in self.all_pitches():
@@ -261,7 +270,7 @@ class PondPitch(PondObject):
 
     def as_string(self):
         return self.note_string() + self.octave_string()
-    
+
     @classmethod
     def from_absolute_int(cls, pitch_value):
         new_pitch = PondPitch()
