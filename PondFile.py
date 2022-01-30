@@ -55,34 +55,37 @@ class PondDoc:
 
 class PondRender:
     def __init__(self, **config):
-        self.__file_name = "temp_pypond.ly"
-        self.__folder_path = os.path.join("ly_files")
-        self.__auto_write = False
-        self.__version = '\\version "2.22.1"'
-        self.__format = "png"
-        self.current_file = self.__version + "\n"
+        self._file_name = "temp_pypond.ly"
+        self._folder_path = os.path.join("ly_files")
+        self._auto_write = False
+        self._version = '\\version "2.22.1"'
+        self._format = "png"
+        self._resolution = 200
+        self.current_file = self._version + "\n"
         self.set_config(**config)
 
     @property
     def __file_path(self):
-        return os.path.join(self.__folder_path, self.__file_name)
+        return os.path.join(self._folder_path, self._file_name)
 
     @property
     def __render_options(self):
-        return (f"-o{self.__folder_path} "
-                f"-dbackend=eps -dno-gs-load-fonts -dinclude-eps-fonts "
-                f"--png {self.__file_path}")
+        return (f"-o{self._folder_path} "
+                f"-f{self._format} -dbackend=eps -dresolution={self._resolution} "
+                f"-dno-gs-load-fonts -dinclude-eps-fonts "
+                f""
+                f"{self.__file_path}")
 
     def set_config(self, **config):
         for name, value in config.items():
-            attr_name = f"_LyRender__{name}"
+            attr_name = f"_{name}"
             setattr(self, attr_name, value)
 
     def update(self, new_file):
         if isinstance(new_file, PondDoc):
             new_file = new_file.create_file()
-        self.current_file = self.__version + "\n" + new_file
-        if self.__auto_write:
+        self.current_file = self._version + "\n" + new_file
+        if self._auto_write:
             self.write()
 
     def write(self):
