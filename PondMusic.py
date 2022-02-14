@@ -55,13 +55,13 @@ class PondFragment(PondMelody):
 
 class PondPhrase(PondMelody):
     def as_string(self):
-        return f"{self.fragments[0]} ({' '.join(self.render_fragments())})"
-
+        return f"{self.fragments[0]} ({' '.join(list(self.render_fragments())[1:])})"
 
 class PondTuplet(PondMelody):
-    def __init__(self, num=3, den=2, duration=4, notes=None):
+    def __init__(self, num=3, den=2, duration=4, notes=None, add_phrasing=False):
         super().__init__(notes)
         self.tuplet_info = f"{num}/{den} {duration}"
+        self.add_phrasing = add_phrasing
 
     def as_string(self):
         return f"\\tuplet {self.tuplet_info} {{{' '.join(self.render_fragments())}}}"
@@ -90,7 +90,7 @@ class PondNote(PondObject):
 
     def as_string(self):
         return (self.pre_marks + self.pitch_string() + self.duration +
-                self.articulation + self.tie + self.dynamic +
+                self.articulation + self.tie + self.dynamic + self.expressions +
                 ' '.join(map(str, self.post_marks)))
 
     def trill_marks(self, begin=True, pitched=None, clear=False, relative=True):
