@@ -20,14 +20,14 @@ class PondScore(PondAbstractCommand):
             except AssertionError:
                 raise ValueError("To add more than one staff to a PondScore, "
                                  "you must use the PondStaff class")
-        self.__stave.append(str(new_staff))
+        self.__stave.append(new_staff)
 
     def clear_staves(self):
         self.__stave.clear()
 
     def as_string(self):
         return (f"\\{self.tag_name} {{\n" 
-                f"{' '.join(self.__stave)}"
+                f"<<{' '.join(map(str, self.__stave))}>>"
                 f"}}")
 
 

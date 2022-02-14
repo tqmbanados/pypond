@@ -62,7 +62,7 @@ class PondPhrase(PondMelody):
             return f"{self.fragments[0]} ({' '.join(list(self.render_fragments())[1:])})"
         except IndexError:
             return super().as_string()
-        
+
 
 class PondTuplet(PondMelody):
     def __init__(self, num=3, den=2, duration=4, notes=None, add_phrasing=False):
@@ -100,6 +100,10 @@ class PondNote(PondObject):
             self.phrase_mark = ")"
         else:
             self.phrase_mark = ""
+
+    @property
+    def absolute_int(self):
+        return self.pitch.absolute_int
 
     def make_rest(self):
         self.pitch.make_rest()
