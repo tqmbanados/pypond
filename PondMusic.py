@@ -57,6 +57,7 @@ class PondPhrase(PondMelody):
     def as_string(self):
         return f"{self.fragments[0]} ({' '.join(list(self.render_fragments())[1:])})"
 
+
 class PondTuplet(PondMelody):
     def __init__(self, num=3, den=2, duration=4, notes=None, add_phrasing=False):
         super().__init__(notes)
@@ -69,7 +70,8 @@ class PondTuplet(PondMelody):
 
 class PondNote(PondObject):
     def __init__(self, pitch, duration="4", articulation="", dynamic="",
-                 octave=4, tie=False, expression=""):
+                 octave=0, tie=False, expression="", begin_phrase=False,
+                 end_phrase=False):
         self.pitch = PondPitch(pitch, octave)
         self.duration = str(duration)
         self.articulation = articulation
@@ -79,6 +81,19 @@ class PondNote(PondObject):
         self.pre_marks = ""
         self.post_marks = []
         self.auxiliary_pitches = {}
+        self.phrase_mark = ""
+        if begin_phrase:
+            self.phrase_data('begin')
+        elif end_phrase:
+            self.phrase_data('end')
+
+    def phrase_data(self, status="none"):
+        if status == "begin":
+            self.phrase_mark = " ("
+        elif status == "end":
+            self.phrase_mark = ")"
+        else:
+            self.phrase_mark = ""
 
     def transpose(self, steps):
         self.pitch.transpose(steps)
@@ -91,7 +106,7 @@ class PondNote(PondObject):
     def as_string(self):
         return (self.pre_marks + self.pitch_string() + self.duration +
                 self.articulation + self.tie + self.dynamic + self.expressions +
-                ' '.join(map(str, self.post_marks)))
+                ' '.join(map(str, self.post_marks)) + self.phrase_mark)
 
     def trill_marks(self, begin=True, pitched=None, clear=False, relative=True):
         if clear:
@@ -103,7 +118,7 @@ class PondNote(PondObject):
             self.pre_marks += "\\pitchedTrill "
             self.post_marks += [trill_mark, pitched]
         elif isinstance(pitched, (str, int)):
-            octave = self.pitch.octave if relative else 4
+            octave = self.pitch.octave if relative else 0
             pitched = PondPitch(pitched, octave)
             self.pre_marks += "\\pitchedTrill "
             self.auxiliary_pitches["trill"] = pitched
@@ -161,7 +176,7 @@ class PondNoteGroup(PondObject):
         for pitch in self.all_pitches():
             pitch.transpose(steps)
 
-    def add_trill(self, pitch, octave=4, relative=False):
+    def add_trill(self, pitch, octave=0, relative=False):
         if not isinstance(pitch, PondPitch):
             octave = self.main_pitches[0].octave if relative else octave
             pitch = PondPitch(pitch, octave)
@@ -206,7 +221,7 @@ class PondPitch(PondObject):
                    }
     default_key_data = [1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0]
 
-    def __init__(self, pitch=0, octave=4):
+    def __init__(self, pitch=0, octave=0):
         if isinstance(pitch, str):
             pitch = self.__init_from_string(pitch)
         if isinstance(pitch, tuple):
@@ -237,6 +252,10 @@ class PondPitch(PondObject):
     def pitch_data(self):
         return self.pitch, self.octave
 
+    @property
+    def absolute_int(self):
+        return
+
     def make_rest(self):
         self.__pitch = -1
 
@@ -258,10 +277,9 @@ class PondPitch(PondObject):
     def octave_string(self):
         if self.pitch == -1:
             return ""
-        distance = self.__octave - 4
-        if distance > 0:
-            return "'" * distance
-        return "," * distance
+        if self.octave > 0:
+            return "'" * self.octave
+        return "," * self.octave
 
     def transpose(self, steps):
         if self.pitch == -1:
@@ -276,3 +294,5 @@ class PondPitch(PondObject):
         new_pitch = PondPitch()
         new_pitch.transpose(pitch_value)
         return new_pitch
+
+
