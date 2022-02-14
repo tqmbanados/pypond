@@ -78,7 +78,10 @@ class PondNote(PondObject):
     def __init__(self, pitch, duration="4", articulation="", dynamic="",
                  octave=0, tie=False, expression="", dotted=False, begin_phrase=False,
                  end_phrase=False):
-        self.pitch = PondPitch(pitch, octave)
+        if isinstance(pitch, PondPitch):
+            self.pitch = pitch
+        else:
+            self.pitch = PondPitch(pitch, octave)
         self.duration = str(duration) + '.' if dotted else str(duration)
         self.articulation = articulation
         self.dynamic = dynamic
@@ -101,6 +104,9 @@ class PondNote(PondObject):
         else:
             self.phrase_mark = ""
 
+    def make_tie(self, tie=True):
+        self.tie = "~" if tie else ""
+
     @property
     def absolute_int(self):
         return self.pitch.absolute_int
@@ -110,6 +116,12 @@ class PondNote(PondObject):
 
     def make_pitch(self):
         self.pitch.make_pitch()
+
+    @classmethod
+    def create_rest(cls, duration):
+        note = PondNote(-1, duration=duration)
+        note.make_rest()
+        return note
 
     def transpose(self, steps):
         self.pitch.transpose(steps)
