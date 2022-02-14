@@ -47,6 +47,9 @@ class PondMelody(PondObject):
     def as_string(self):
         return f"{{{' '.join(self.render_fragments())}}}"
 
+    def __len__(self):
+        return len(self.ordered_notes())
+
 
 class PondFragment(PondMelody):
     def as_string(self):
@@ -294,9 +297,3 @@ class PondPitch(PondObject):
         new_pitch = PondPitch()
         new_pitch.transpose(pitch_value)
         return new_pitch
-
-
-if __name__ == "__main__":
-    for i in range(-40, 40):
-        pitch = PondPitch.from_absolute_int(i)
-        print(i, pitch.absolute_int)
