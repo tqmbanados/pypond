@@ -254,7 +254,7 @@ class PondPitch(PondObject):
 
     @property
     def absolute_int(self):
-        return
+        return self.pitch + (self.octave * 12)
 
     def make_rest(self):
         self.__pitch = -1
@@ -296,3 +296,7 @@ class PondPitch(PondObject):
         return new_pitch
 
 
+if __name__ == "__main__":
+    for i in range(-40, 40):
+        pitch = PondPitch.from_absolute_int(i)
+        print(i, pitch.absolute_int)
