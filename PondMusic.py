@@ -58,8 +58,11 @@ class PondFragment(PondMelody):
 
 class PondPhrase(PondMelody):
     def as_string(self):
-        return f"{self.fragments[0]} ({' '.join(list(self.render_fragments())[1:])})"
-
+        try:
+            return f"{self.fragments[0]} ({' '.join(list(self.render_fragments())[1:])})"
+        except IndexError:
+            return super().as_string()
+        
 
 class PondTuplet(PondMelody):
     def __init__(self, num=3, den=2, duration=4, notes=None, add_phrasing=False):
@@ -73,10 +76,10 @@ class PondTuplet(PondMelody):
 
 class PondNote(PondObject):
     def __init__(self, pitch, duration="4", articulation="", dynamic="",
-                 octave=0, tie=False, expression="", begin_phrase=False,
+                 octave=0, tie=False, expression="", dotted=False, begin_phrase=False,
                  end_phrase=False):
         self.pitch = PondPitch(pitch, octave)
-        self.duration = str(duration)
+        self.duration = str(duration) + '.' if dotted else str(duration)
         self.articulation = articulation
         self.dynamic = dynamic
         self.tie = "~" if tie else ""
@@ -97,6 +100,12 @@ class PondNote(PondObject):
             self.phrase_mark = ")"
         else:
             self.phrase_mark = ""
+
+    def make_rest(self):
+        self.pitch.make_rest()
+
+    def make_pitch(self):
+        self.pitch.make_pitch()
 
     def transpose(self, steps):
         self.pitch.transpose(steps)
@@ -230,8 +239,9 @@ class PondPitch(PondObject):
         if isinstance(pitch, tuple):
             pitch = pitch[0]
             octave = pitch[1]
-        self.__pitch = pitch
+        self.__pitch = 0
         self.__octave = octave
+        self.pitch = pitch
 
     @property
     def pitch(self):
