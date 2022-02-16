@@ -14,12 +14,15 @@ class PondMelody(PondObject):
         return self.__fragments
 
     def append_fragment(self, fragment):
+        self.insert_fragment(len(self.fragments), fragment)
+
+    def insert_fragment(self, index, fragment):
         if isinstance(fragment, (PondMelody, PondNote)):
-            self.__fragments.append(fragment)
+            self.__fragments.insert(index, fragment)
         elif isinstance(fragment, int):
-            self.__fragments.append(PondNote(fragment))
+            self.__fragments.insert(index, PondNote(fragment))
         elif isinstance(fragment, dict):
-            self.__fragments.append(PondNote(**fragment))
+            self.__fragments.insert(index, PondNote(**fragment))
         else:
             raise ValueError(f"Object {fragment} cannot be "
                              f"interpreted as PondNote or PondMelody")
@@ -116,6 +119,9 @@ class PondNote(PondObject):
 
     def make_pitch(self):
         self.pitch.make_pitch()
+
+    def set_ignore_accidental(self, value):
+        self.pitch.ignore_accidental = value
 
     @classmethod
     def create_rest(cls, duration):
@@ -249,7 +255,7 @@ class PondPitch(PondObject):
                    }
     default_key_data = [1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0]
 
-    def __init__(self, pitch=0, octave=0):
+    def __init__(self, pitch=0, octave=0, ignore_accidental=False):
         if isinstance(pitch, str):
             pitch = self.__init_from_string(pitch)
         if isinstance(pitch, tuple):
@@ -258,6 +264,7 @@ class PondPitch(PondObject):
         self.__pitch = 0
         self.__octave = octave
         self.pitch = pitch
+        self.ignore_accidental = ignore_accidental
 
     @property
     def pitch(self):
@@ -301,6 +308,8 @@ class PondPitch(PondObject):
     def note_string(self, key_data=None, name_position=None):
         key_data = key_data or self.default_key_data
         name_position = name_position or key_data[self.pitch]
+        if self.ignore_accidental:
+            return self.pitch_names[self.pitch][name_position][0]
         return self.pitch_names[self.pitch][name_position]
 
     def octave_string(self):
