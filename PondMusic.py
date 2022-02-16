@@ -87,7 +87,7 @@ class PondNote(PondObject):
         self.dynamic = dynamic
         self.tie = "~" if tie else ""
         self.expressions = expression
-        self.pre_marks = ""
+        self.pre_marks = []
         self.post_marks = []
         self.auxiliary_pitches = {}
         self.phrase_mark = ""
@@ -132,23 +132,23 @@ class PondNote(PondObject):
         return self.pitch.as_string()
 
     def as_string(self):
-        return (self.pre_marks + self.pitch_string() + self.duration +
+        return (' '.join(map(str, self.pre_marks)) + self.pitch_string() + self.duration +
                 self.articulation + self.tie + self.dynamic + self.expressions +
                 ' '.join(map(str, self.post_marks)) + self.phrase_mark)
 
     def trill_marks(self, begin=True, pitched=None, clear=False, relative=True):
         if clear:
-            self.pre_marks = ""
+            self.pre_marks = []
             self.post_marks = []
             return
         trill_mark = "\\startTrillSpan " if begin else "\\stopTrillSpan "
         if isinstance(pitched, PondPitch):
-            self.pre_marks += "\\pitchedTrill "
+            self.pre_marks += ["\\pitchedTrill "]
             self.post_marks += [trill_mark, pitched]
         elif isinstance(pitched, (str, int)):
             octave = self.pitch.octave if relative else 0
             pitched = PondPitch(pitched, octave)
-            self.pre_marks += "\\pitchedTrill "
+            self.pre_marks += ["\\pitchedTrill "]
             self.auxiliary_pitches["trill"] = pitched
             self.post_marks += [trill_mark, pitched]
         else:
