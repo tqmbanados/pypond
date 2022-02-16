@@ -68,13 +68,13 @@ class PondPhrase(PondMelody):
 
 
 class PondTuplet(PondMelody):
-    def __init__(self, num=3, den=2, duration=4, notes=None, add_phrasing=False):
+    def __init__(self, num=3, den=2, duration=4, notes=None):
         super().__init__(notes)
-        self.tuplet_info = f"{num}/{den} {duration}"
-        self.add_phrasing = add_phrasing
+        self.data = (num, den, duration)
+        self.string_data = f"{num}/{den} {duration}"
 
     def as_string(self):
-        return f"\\tuplet {self.tuplet_info} {{{' '.join(self.render_fragments())}}}"
+        return f"\\tuplet {self.string_data} {{{' '.join(self.render_fragments())}}}"
 
 
 class PondNote(PondObject):
