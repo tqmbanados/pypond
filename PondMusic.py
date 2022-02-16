@@ -123,6 +123,10 @@ class PondNote(PondObject):
     def set_ignore_accidental(self, value):
         self.pitch.ignore_accidental = value
 
+    def hide_notehead(self):
+        self.pre_marks.append("\\hide NoteHead ")
+        self.post_marks.append(" \\undo \\hide NoteHead")
+
     @classmethod
     def create_rest(cls, duration):
         note = PondNote(-1, duration=duration)
