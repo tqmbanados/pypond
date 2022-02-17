@@ -15,6 +15,9 @@ class PondAbstractCommand(PondObject, ABC):
     def as_string(self):
         return f"\\{self.tag_name} {{{self.subcommands}}}"
 
+    def __str__(self):
+        return self.as_string()
+
 
 class PondHeader(PondAbstractCommand):
     @property

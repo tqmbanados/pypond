@@ -50,10 +50,10 @@ class PondKey(PondAbstractCommand):
 class PondTimeSignature(PondAbstractCommand):
 
     def __init__(self, beat_number, beat_value, traditional=True):
-        super().__init__(self)
+        super().__init__()
         if traditional:
             self.validate_beats(beat_value)
-        self.time = f"{beat_number}//{beat_value}"
+        self.time = f"{beat_number}/{beat_value}"
 
     @property
     def tag_name(self):
