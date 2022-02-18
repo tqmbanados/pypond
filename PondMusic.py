@@ -1,4 +1,4 @@
-from PondCore import PondObject
+from PondCore import PondObject, DurationInterface
 
 
 class PondMelody(PondObject):
@@ -50,6 +50,13 @@ class PondMelody(PondObject):
     def as_string(self):
         return f"{{{' '.join(self.render_fragments())}}}"
 
+    @property
+    def real_duration(self):
+        total = 0
+        for element in self.fragments:
+            total += element.real_duration
+        return total
+
     def __len__(self):
         return len(self.ordered_notes())
 
@@ -68,10 +75,19 @@ class PondPhrase(PondMelody):
 
 
 class PondTuplet(PondMelody):
-    def __init__(self, num=3, den=2, duration=4, notes=None):
+    def __init__(self, num=3, den=2, group_duration=4, notes=None):
         super().__init__(notes)
-        self.data = (num, den, duration)
-        self.string_data = f"{num}/{den} {duration}"
+        self.data = (num, den, group_duration)
+        self.string_data = f"{num}/{den} {group_duration}"
+
+    @property
+    def real_duration(self):
+        assert DurationInterface.is_complete_tuplet(self), ("Cannot correctly approximate an "
+                                                            "incomplete tuplet's duration. "
+                                                            "Returning aproximate value")
+        num, den, group_duration = self.data
+        tuplet_duration = DurationInterface.get_fragment_duration(self)
+        return tuplet_duration / (num / den)
 
     def as_string(self):
         return f"\\tuplet {self.string_data} {{{' '.join(self.render_fragments())}}}"
@@ -109,6 +125,14 @@ class PondNote(PondObject):
 
     def make_tie(self, tie=True):
         self.tie = "~" if tie else ""
+
+    @property
+    def real_duration(self):
+        return DurationInterface.get_real_duration(self.duration)
+
+    @real_duration.setter
+    def real_duration(self, value):
+        self.duration = DurationInterface.get_pond_duration(value)
 
     @property
     def absolute_int(self):
@@ -336,3 +360,23 @@ class PondPitch(PondObject):
         new_pitch = PondPitch()
         new_pitch.transpose(pitch_value)
         return new_pitch
+
+
+if __name__ == "__main__":
+    new_tuplet = PondTuplet(3, 2)
+    new_note = PondNote(0, "8")
+    for i in range(12):
+        new_tuplet.append_fragment(new_note)
+
+    fragment = PondPhrase()
+    for i in range(3):
+        fragment.append_fragment(new_note)
+    new_tuplet.append_fragment(fragment)
+    main_fragment = PondMelody()
+    for i in range(2):
+        duration = 0.125 * (2**i)
+        pond_duration = DurationInterface.get_pond_duration(duration)
+        new_note = PondNote(0, pond_duration)
+        main_fragment.append_fragment(new_note)
+    main_fragment.append_fragment(new_tuplet)
+    print(main_fragment.real_duration)
