@@ -101,6 +101,7 @@ class PondNote(PondObject):
             self.pitch = pitch
         else:
             self.pitch = PondPitch(pitch, octave)
+        assert duration != 0, f"PondNote of pitch {pitch} cannot have duration 0"
         self.duration = str(duration) + '.' if dotted else str(duration)
         self.articulation = articulation
         self.dynamic = dynamic

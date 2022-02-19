@@ -22,6 +22,13 @@ class CustomFunction(PondObject):
 class DurationInterface:
     simple_converter = {0.125: "32",
                         0.25: "16",
+                        0.5: "8",
+                        1: "4",
+                        2: "2",
+                        4: "1",
+                        }
+    dotted_converter = {0.125: "32",
+                        0.25: "16",
                         0.375: "16.",
                         0.5: "8",
                         0.75: "8.",
@@ -33,19 +40,22 @@ class DurationInterface:
                         6: "1."
                         }
 
-    reverse_simple_converter = {value: key for key, value in simple_converter.items()}
+    reverse_dotted_converter = {value: key for key, value in dotted_converter.items()}
 
     @classmethod
-    def get_duration_list(cls, duration):
+    def get_duration_list(cls, duration, simple=False, start=0):
         if duration % 0.125 or duration > 6:
             raise ValueError(f"DurationConverter currently only accepts "
                              f"values up to the semiquaver. Attempted value: {duration}")
         duration_list = []
-        current_value = duration
+        current_value = duration - start
         next_value = 0
+        converter = cls.simple_converter if simple else cls.dotted_converter
+        if start != 0:
+            duration_list.append(converter[start])
         while current_value > 0:
-            if current_value in cls.simple_converter:
-                duration_list.append(cls.simple_converter[current_value])
+            if current_value in converter:
+                duration_list.append(converter[current_value])
                 current_value = next_value
                 next_value = 0
             else:
@@ -54,10 +64,9 @@ class DurationInterface:
         return duration_list
 
     @classmethod
-    def get_fragment_duration(cls, fragment, tuplet_tiime=False):
+    def get_fragment_duration(cls, fragment):
         """
-        Warning: Only provides correct Tuplet duration for **complete** tuplets.
-        Use "get_remaining_tuplet_time" to view if they are complete.
+        Warning: does not provide correct duration of tuplets
         """
         mapped = map(lambda x: cls.get_real_duration(x.duration), fragment.ordered_notes())
         return sum(mapped)
@@ -67,23 +76,16 @@ class DurationInterface:
         target, base_value, duration = tuplet.data
         pond_duration = int(base_value) * int(duration)
         base_duration = cls.get_real_duration(pond_duration)
-        total_duration = cls.get_fragment_duration(tuplet, True)
+        total_duration = cls.get_fragment_duration(tuplet)
         remaining_beats = target - ((total_duration / base_duration) % target)
         if remaining_beats == target:
             remaining_beats = 0
         return int(remaining_beats), base_duration
 
     @classmethod
-    def is_complete_tuplet(cls, tuplet):
-        remaining, base = cls.get_remainig_tuplet_time(tuplet)
-        if remaining != 0:
-            return False
-        return True
-
-    @classmethod
     def get_pond_duration(cls, duration):
         try:
-            return cls.simple_converter[float(duration)]
+            return cls.dotted_converter[float(duration)]
         except KeyError:
             raise ValueError(f"DurationConverter currently only accepts "
                              f"values up to the semiquaver. Attempted value: {duration}")
@@ -91,7 +93,14 @@ class DurationInterface:
     @classmethod
     def get_real_duration(cls, duration):
         try:
-            return cls.reverse_simple_converter[str(duration)]
+            return cls.reverse_dotted_converter[str(duration)]
         except KeyError:
             raise ValueError(f"DurationConverter requires a valid Lilypond duration. "
                              f"Attempted value: {duration}")
+
+    @classmethod
+    def is_complete_tuplet(cls, tuplet):
+        remaining, base = cls.get_remainig_tuplet_time(tuplet)
+        if remaining != 0:
+            return False
+        return True
