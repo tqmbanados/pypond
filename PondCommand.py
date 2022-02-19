@@ -4,7 +4,7 @@ from PondCore import PondObject
 
 class PondAbstractCommand(PondObject, ABC):
     def __init__(self, *subcommands):
-        self.subcommands = " ".join(subcommands)
+        self.subcommands = " ".join(map(str, subcommands))
 
     @property
     @abstractmethod
@@ -40,6 +40,7 @@ class PondLayout(PondAbstractCommand):
 class PondMarkup(PondAbstractCommand):
     italic = "\\italic"
     bold = "\\bold"
+    small = "\\smaller"
 
     def __init__(self, text, *subcommands):
         super().__init__(*subcommands)
@@ -51,6 +52,10 @@ class PondMarkup(PondAbstractCommand):
 
     def as_string(self):
         return f"\\{self.tag_name} {{{self.subcommands} {self.text}}}"
+
+    def add_to_note(self, over=True):
+        position_marker = "^" if over else "-"
+        return position_marker + str(self)
 
 
 class PondPaper(PondAbstractCommand):

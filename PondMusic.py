@@ -152,6 +152,10 @@ class PondNote(PondObject):
         self.pre_marks.append("\\hide NoteHead ")
         self.post_marks.append(" \\undo \\hide NoteHead")
 
+    def hide_note(self):
+        self.pre_marks.append("\\hideNotes ")
+        self.post_marks.append(" \\undo \\hideNotes")
+
     @classmethod
     def create_rest(cls, duration):
         note = PondNote(-1, duration=duration)
