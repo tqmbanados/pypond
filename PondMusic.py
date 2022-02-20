@@ -148,6 +148,9 @@ class PondNote(PondObject):
     def make_pitch(self):
         self.pitch.make_pitch()
 
+    def is_rest(self):
+        return self.pitch.pitch == -1
+
     def set_ignore_accidental(self, value):
         self.pitch.ignore_accidental = value
 
