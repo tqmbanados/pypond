@@ -16,6 +16,9 @@ class PondMelody(PondObject):
     def append_fragment(self, fragment):
         self.insert_fragment(len(self.fragments), fragment)
 
+    def get_note(self, idx):
+        return self.ordered_notes()[idx]
+
     def insert_fragment(self, index, fragment):
         if isinstance(fragment, (PondMelody, PondNote)):
             self.__fragments.insert(index, fragment)
