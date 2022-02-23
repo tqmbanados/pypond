@@ -40,7 +40,8 @@ class PondMelody(PondObject):
         self.__transposition += steps
 
     def render_fragments(self):
-        return map(str, self.fragments)
+        valid_fragments = filter(lambda x: x.real_duration > 0, self.fragments)
+        return map(str, valid_fragments)
 
     def ordered_notes(self):
         ordered = []
@@ -68,6 +69,7 @@ class PondMelody(PondObject):
 
 class PondFragment(PondMelody):
     def as_string(self):
+        print(self.real_duration)
         return ' '.join(self.render_fragments())
 
 
