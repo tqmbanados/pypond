@@ -43,17 +43,21 @@ class DurationInterface:
     reverse_dotted_converter = {value: key for key, value in dotted_converter.items()}
 
     @classmethod
-    def get_duration_list(cls, duration, simple=False, start=0):
-        if duration % 0.125 or duration > 6:
+    def get_duration_list(cls, duration, simple=False, start=0, max_duration=6):
+        if duration % 0.125:
             raise ValueError(f"DurationConverter currently only accepts "
                              f"values up to the semiquaver. Attempted value: {duration}")
         duration_list = []
         current_value = duration - start
         next_value = 0
         converter = cls.simple_converter if simple else cls.dotted_converter
-        if start != 0:
+        if start:
             duration_list.append(converter[start])
         while current_value > 0:
+            if current_value > max_duration:
+                diff = current_value - max_duration
+                current_value -= max_duration
+                next_value += diff
             if current_value in converter:
                 duration_list.append(converter[current_value])
                 current_value = next_value

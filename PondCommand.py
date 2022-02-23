@@ -3,8 +3,18 @@ from PondCore import PondObject
 
 
 class PondAbstractCommand(PondObject, ABC):
-    def __init__(self, *subcommands):
-        self.subcommands = " ".join(map(str, subcommands))
+    def __init__(self, *subcommands, **kwcommands):
+        self.__subcommands = subcommands
+        self.__kwcommands = kwcommands
+
+    @property
+    def subcommands(self):
+        return " ".join(map(str, self.__subcommands))
+
+    @property
+    def kwcommands(self):
+        return "\n".join(f"{key} = {value}"
+                         for key, value in self.__kwcommands.items())
 
     @property
     @abstractmethod
@@ -13,19 +23,25 @@ class PondAbstractCommand(PondObject, ABC):
 
     @abstractmethod
     def as_string(self):
-        return f"\\{self.tag_name} {{{self.subcommands}}}"
+        return (f"\\{self.tag_name} {{\n"
+                f"{self.subcommands}\n"
+                f"{self.kwcommands}}}\n")
 
     def __str__(self):
         return self.as_string()
 
 
 class PondHeader(PondAbstractCommand):
+
+    def __init__(self, *subcommands, tagline="##f", **kwcommands):
+        super().__init__(*subcommands, tagline=tagline, **kwcommands)
+
     @property
     def tag_name(self):
         return "header"
 
     def as_string(self):
-        return f"\\{self.tag_name} {{ tagline = ##f }}"
+        return super().as_string()
 
 
 class PondLayout(PondAbstractCommand):
@@ -34,7 +50,7 @@ class PondLayout(PondAbstractCommand):
         return "layout"
 
     def as_string(self):
-        return f"\\{self.tag_name} {{}}"
+        return super().as_string()
 
 
 class PondMarkup(PondAbstractCommand):
@@ -42,8 +58,8 @@ class PondMarkup(PondAbstractCommand):
     bold = "\\bold"
     small = "\\smaller"
 
-    def __init__(self, text, *subcommands):
-        super().__init__(*subcommands)
+    def __init__(self, text, *subcommands, **kwcommands):
+        super().__init__(*subcommands, **kwcommands)
         self.text = text
 
     @property
@@ -59,9 +75,17 @@ class PondMarkup(PondAbstractCommand):
 
 
 class PondPaper(PondAbstractCommand):
+    basic_spacing_data = """system-system-spacing =
+    #'((basic-distance . 25) 
+       (minimum-distance . 18)
+       (padding . 2)
+       (stretchability . 60)) 
+markup-system-spacing = 
+    #'((basic-distance . 40)
+      (minimum-distance . 18))"""
 
-    def __init__(self, *subcommands):
-        super().__init__(self, *subcommands)
+    def __init__(self, *subcommands, **kwcommands):
+        super().__init__(self, *subcommands, **kwcommands)
         self.__margins = {"top-margin": 0,
                           "bottom-margin": 0,
                           "left-margin": 0,
@@ -79,9 +103,20 @@ class PondPaper(PondAbstractCommand):
             return
         self.__margins[margin] = value
 
+    def update_margins(self, values):
+        self.__margins.update(values)
+
     @property
     def tag_name(self):
         return "paper"
 
     def as_string(self):
-        return f"\\{self.tag_name} {{{self.get_margins()}}}"
+        return (f"\\{self.tag_name} {{\n"
+                f"{self.get_margins()}\n"
+                f"{self.basic_spacing_data}\n"
+                f"}}")
+
+
+if __name__ == "__main__":
+    header = PondHeader(title="miau", composer="Thyme", tagline="##f")
+    print(header.as_string())

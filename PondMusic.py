@@ -2,12 +2,13 @@ from PondCore import PondObject, DurationInterface
 
 
 class PondMelody(PondObject):
-    def __init__(self, fragments=None):
+    def __init__(self, fragments=None, time_string=""):
         self.__fragments = []
         self.__transposition = 0
         if fragments is not None:
             for fragment in fragments:
                 self.append_fragment(fragment)
+        self.time_string = time_string
 
     @property
     def fragments(self):
@@ -51,7 +52,7 @@ class PondMelody(PondObject):
         return ordered
 
     def as_string(self):
-        return f"{{{' '.join(self.render_fragments())}}}"
+        return f"{self.time_string}{{{' '.join(self.render_fragments())}}}\n"
 
     @property
     def real_duration(self):
@@ -66,13 +67,14 @@ class PondMelody(PondObject):
 
 class PondFragment(PondMelody):
     def as_string(self):
-        return ' '.join(self.render_fragments())
+        return ' '.join(self.render_fragments()) + "\n"
 
 
 class PondPhrase(PondMelody):
     def as_string(self):
         try:
-            return f"{self.fragments[0]} ({' '.join(list(self.render_fragments())[1:])})"
+            return (f"{self.time_string}{self.fragments[0]} "
+                    f"({' '.join(list(self.render_fragments())[1:])})\n")
         except IndexError:
             return super().as_string()
 
@@ -86,14 +88,14 @@ class PondTuplet(PondMelody):
     @property
     def real_duration(self):
         assert DurationInterface.is_complete_tuplet(self), ("Cannot correctly approximate an "
-                                                            "incomplete tuplet's duration. "
-                                                            "Returning aproximate value")
+                                                            "incomplete tuplet's duration.")
         num, den, group_duration = self.data
         tuplet_duration = DurationInterface.get_fragment_duration(self)
         return tuplet_duration / (num / den)
 
     def as_string(self):
-        return f"\\tuplet {self.string_data} {{{' '.join(self.render_fragments())}}}"
+        return (f"{self.time_string}\\tuplet {self.string_data} "
+                f"{{{' '.join(self.render_fragments())}}}\n")
 
 
 class PondNote(PondObject):
@@ -147,6 +149,14 @@ class PondNote(PondObject):
 
     def make_pitch(self):
         self.pitch.make_pitch()
+
+    def make_cadenza(self, value=True):
+        if value:
+            self.pre_marks.append("\\CadenzaOn")
+            self.post_marks.append("\\CadenzaOff")
+        else:
+            self.pre_marks.remove("\\CadenzaOn")
+            self.post_marks.remove("\\CadenzaOff")
 
     def is_rest(self):
         return self.pitch.pitch == -1

@@ -45,8 +45,8 @@ class PondDoc:
     def functions(self):
         return "\n".join(self.__functions)
 
-    def add_function(self, value):
-        self.__functions.append(str(value))
+    def add_function(self, name, value):
+        self.__functions.append(f"{name} = {value}")
 
     def create_file(self):
         return "\n".join([self.header, self.paper, self.functions,
