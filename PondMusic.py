@@ -164,8 +164,11 @@ class PondNote(PondObject):
     def is_rest(self):
         return self.pitch.pitch == -1
 
-    def set_ignore_accidental(self, value):
-        self.pitch.ignore_accidental = value
+    def set_ignore_accidental(self, value=True):
+        if value:
+            self.pre_marks.append("\\once\\omit Accidental")
+        else:
+            self.pre_marks.remove("\\once\\omit Accidental")
 
     def hide_notehead(self):
         self.pre_marks.append("\\hide NoteHead ")
@@ -307,7 +310,7 @@ class PondPitch(PondObject):
                    }
     default_key_data = [1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0]
 
-    def __init__(self, pitch=0, octave=0, ignore_accidental=False):
+    def __init__(self, pitch=0, octave=0):
         if isinstance(pitch, str):
             pitch = self.__init_from_string(pitch)
         if isinstance(pitch, tuple):
@@ -316,7 +319,6 @@ class PondPitch(PondObject):
         self.__pitch = 0
         self.__octave = octave
         self.pitch = pitch
-        self.ignore_accidental = ignore_accidental
 
     @property
     def pitch(self):
@@ -360,8 +362,6 @@ class PondPitch(PondObject):
     def note_string(self, key_data=None, name_position=None):
         key_data = key_data or self.default_key_data
         name_position = name_position or key_data[self.pitch]
-        if self.ignore_accidental:
-            return self.pitch_names[self.pitch][name_position][0]
         return self.pitch_names[self.pitch][name_position]
 
     def octave_string(self):
@@ -384,23 +384,3 @@ class PondPitch(PondObject):
         new_pitch = PondPitch()
         new_pitch.transpose(pitch_value)
         return new_pitch
-
-
-if __name__ == "__main__":
-    new_tuplet = PondTuplet(3, 2)
-    new_note = PondNote(0, "8")
-    for i in range(12):
-        new_tuplet.append_fragment(new_note)
-
-    fragment = PondPhrase()
-    for i in range(3):
-        fragment.append_fragment(new_note)
-    new_tuplet.append_fragment(fragment)
-    main_fragment = PondMelody()
-    for i in range(2):
-        duration = 0.125 * (2**i)
-        pond_duration = DurationInterface.get_pond_duration(duration)
-        new_note = PondNote(0, pond_duration)
-        main_fragment.append_fragment(new_note)
-    main_fragment.append_fragment(new_tuplet)
-    print(main_fragment.real_duration)
