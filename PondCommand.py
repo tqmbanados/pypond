@@ -75,14 +75,6 @@ class PondMarkup(PondAbstractCommand):
 
 
 class PondPaper(PondAbstractCommand):
-    basic_spacing_data = """system-system-spacing =
-    #'((basic-distance . 25) 
-       (minimum-distance . 18)
-       (padding . 2)
-       (stretchability . 60)) 
-markup-system-spacing = 
-    #'((basic-distance . 40)
-      (minimum-distance . 18))"""
 
     def __init__(self, *subcommands, **kwcommands):
         super().__init__(self, *subcommands, **kwcommands)
@@ -90,6 +82,7 @@ markup-system-spacing =
                           "bottom-margin": 0,
                           "left-margin": 0,
                           "right-margin": 0}
+        self.additional_data = []
 
     def get_margins(self):
         margin_strings = []
@@ -113,7 +106,7 @@ markup-system-spacing =
     def as_string(self):
         return (f"\\{self.tag_name} {{\n"
                 f"{self.get_margins()}\n"
-                f"{self.basic_spacing_data}\n"
+                f"{' '.join(self.additional_data)}\n"
                 f"}}")
 
 
