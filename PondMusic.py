@@ -69,7 +69,6 @@ class PondMelody(PondObject):
 
 class PondFragment(PondMelody):
     def as_string(self):
-        print(self.real_duration)
         return ' '.join(self.render_fragments())
 
 
@@ -164,7 +163,7 @@ class PondNote(PondObject):
     def is_rest(self):
         return self.pitch.pitch == -1
 
-    def set_ignore_accidental(self, value=True):
+    def ignore_accidental(self, value=True):
         if value:
             self.pre_marks.append("\\once\\omit Accidental")
         else:
