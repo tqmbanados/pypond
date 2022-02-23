@@ -55,10 +55,9 @@ class DurationInterface:
             duration_list.append(cls.dotted_converter[start])
         while current_value > 0:
             if current_value > max_duration:
-                diff = current_value - max_duration
                 current_value -= max_duration
-                next_value += diff
-            if current_value in converter:
+                duration_list.append(converter[max_duration])
+            elif current_value in converter:
                 duration_list.append(converter[current_value])
                 current_value = next_value
                 next_value = 0
