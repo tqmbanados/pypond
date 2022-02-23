@@ -52,7 +52,8 @@ class PondMelody(PondObject):
         return ordered
 
     def as_string(self):
-        return f"{self.time_string}{{{' '.join(self.render_fragments())}}}\n"
+        fragments = '\n'.join(self.render_fragments())
+        return f"{self.time_string}{{{fragments}}}\n"
 
     @property
     def real_duration(self):
@@ -67,14 +68,14 @@ class PondMelody(PondObject):
 
 class PondFragment(PondMelody):
     def as_string(self):
-        return ' '.join(self.render_fragments()) + "\n"
+        return ' '.join(self.render_fragments())
 
 
 class PondPhrase(PondMelody):
     def as_string(self):
         try:
             return (f"{self.time_string}{self.fragments[0]} "
-                    f"({' '.join(list(self.render_fragments())[1:])})\n")
+                    f"({' '.join(list(self.render_fragments())[1:])})")
         except IndexError:
             return super().as_string()
 
@@ -95,7 +96,7 @@ class PondTuplet(PondMelody):
 
     def as_string(self):
         return (f"{self.time_string}\\tuplet {self.string_data} "
-                f"{{{' '.join(self.render_fragments())}}}\n")
+                f"{{{' '.join(self.render_fragments())}}}")
 
 
 class PondNote(PondObject):

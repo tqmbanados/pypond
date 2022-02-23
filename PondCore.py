@@ -50,7 +50,7 @@ class DurationInterface:
         duration_list = []
         current_value = duration - start
         next_value = 0
-        converter = cls.simple_converter if simple else cls.dotted_converter
+        converter = cls.dotted_converter
         if start:
             duration_list.append(converter[start])
         while current_value > 0:
