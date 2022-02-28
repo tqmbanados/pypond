@@ -79,6 +79,7 @@ class PondStaff(PondObject):
         self.__key_signature = ""
         self.__time_signature = ""
         self.__music = ""
+        self.top_level_text = []
         self.with_comands = {}  #{"omit": "TimeSignature"}
 
     @property
@@ -124,10 +125,15 @@ class PondStaff(PondObject):
             return ""
         return f"\\with {{\n{commands}\n}}\n"
 
+    @property
+    def top_text(self):
+        return '\n'.join(self.top_level_text)
+
     def as_string(self):
         return (f"\\{self.tag_name} "
                 f"{self.with_string()}"
                 f"{{\n"
+                f"{self.top_text}"
                 f"{self.key_signature}"
                 f"{self.time_signature}"
                 f"{self.get_voices()}\n"
