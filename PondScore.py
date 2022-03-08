@@ -1,5 +1,5 @@
-from PondCommand import PondAbstractCommand
-from PondCore import PondObject
+from .PondCommand import PondAbstractCommand
+from .PondCore import PondObject
 
 
 class PondScore(PondAbstractCommand):

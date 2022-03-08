@@ -1,4 +1,4 @@
-from PondCore import PondObject, DurationInterface
+from .PondCore import PondObject, DurationInterface
 
 
 class PondMelody(PondObject):

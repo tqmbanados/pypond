@@ -1,5 +1,5 @@
 from abc import abstractmethod, ABC
-from PondCore import PondObject
+from .PondCore import PondObject
 
 
 class PondAbstractCommand(PondObject, ABC):
