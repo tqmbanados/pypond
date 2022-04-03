@@ -15,7 +15,7 @@ class PondDoc:
 
     @header.setter
     def header(self, value):
-        self.__header = value.as_string()
+        self.__header = str(value)
 
     @property
     def paper(self):
@@ -23,7 +23,7 @@ class PondDoc:
 
     @paper.setter
     def paper(self, value):
-        self.__paper = value.as_string()
+        self.__paper = str(value)
 
     @property
     def layout(self):
@@ -31,7 +31,7 @@ class PondDoc:
 
     @layout.setter
     def layout(self, value):
-        self.__layout = value.as_string()
+        self.__layout = str(value)
 
     @property
     def score(self):
@@ -39,7 +39,7 @@ class PondDoc:
 
     @score.setter
     def score(self, value):
-        self.__score = value.as_string()
+        self.__score = str(value)
 
     @property
     def functions(self):
