@@ -118,6 +118,7 @@ class PondNote(PondObject):
         self.post_marks = []
         self.auxiliary_pitches = {}
         self.phrase_mark = ""
+        self.static = False  # Cannot be transposed
         if begin_phrase:
             self.phrase_data('begin')
         elif end_phrase:
@@ -148,6 +149,7 @@ class PondNote(PondObject):
 
     def make_rest(self):
         self.pitch.make_rest()
+        self.static = True
 
     def make_pitch(self):
         self.pitch.make_pitch()
@@ -184,9 +186,14 @@ class PondNote(PondObject):
         return note
 
     def transpose(self, steps):
+        if self.static:
+            return
         self.pitch.transpose(steps)
         for pitch in self.auxiliary_pitches.values():
             pitch.transpose(steps)
+
+    def set_static(self, value):
+        self.static = bool(value)
 
     def pitch_string(self):
         return self.pitch.as_string()
