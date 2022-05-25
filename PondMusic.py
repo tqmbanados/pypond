@@ -34,9 +34,9 @@ class PondMelody(PondObject):
     def clear_fragments(self):
         self.__fragments = []
 
-    def transpose(self, steps):
+    def transpose(self, steps, override_static=False):
         for fragment in self.fragments:
-            fragment.transpose(steps)
+            fragment.transpose(steps, override_static=override_static)
         self.__transposition += steps
 
     def render_fragments(self):
@@ -268,9 +268,9 @@ class PondNoteGroup(PondObject):
                 tie = ""
             yield str(pitch) + tie
 
-    def transpose(self, steps):
+    def transpose(self, steps, override_static=False):
         for pitch in self.all_pitches():
-            pitch.transpose(steps)
+            pitch.transpose(steps, override_static=override_static)
 
     def add_trill(self, pitch, octave=0, relative=False):
         if not isinstance(pitch, PondPitch):
