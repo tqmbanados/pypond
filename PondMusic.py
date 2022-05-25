@@ -153,6 +153,7 @@ class PondNote(PondObject):
 
     def make_pitch(self):
         self.pitch.make_pitch()
+        self.static = False
 
     def make_cadenza(self, value=True):
         if value:
@@ -185,8 +186,8 @@ class PondNote(PondObject):
         note.make_rest()
         return note
 
-    def transpose(self, steps):
-        if self.static:
+    def transpose(self, steps, override_static=False):
+        if self.static and not override_static:
             return
         self.pitch.transpose(steps)
         for pitch in self.auxiliary_pitches.values():
