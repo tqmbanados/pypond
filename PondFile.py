@@ -94,17 +94,3 @@ class PondRender:
 
     def render(self):
         os.system(f"lilypond {self.__render_options} {self.__file_path}")
-
-
-if __name__ == "__main__":
-    render = PondRender(auto_write=True)
-    render.update("""
-\\header {
-    tagline = ##f
-    }
-\\score {
-    {a4 b c d}
-    }
-    """)
-    render.write()
-    render.render()

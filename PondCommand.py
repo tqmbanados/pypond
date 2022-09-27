@@ -1,3 +1,7 @@
+"""
+File for
+"""
+
 from abc import abstractmethod, ABC
 from .PondCore import PondObject
 
@@ -108,8 +112,3 @@ class PondPaper(PondAbstractCommand):
                 f"{self.get_margins()}\n"
                 f"{' '.join(self.additional_data)}\n"
                 f"}}")
-
-
-if __name__ == "__main__":
-    header = PondHeader(title="miau", composer="Thyme", tagline="##f")
-    print(header.as_string())
