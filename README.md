@@ -2,6 +2,8 @@
 Library for creating LilyPond code using Python OOP. Optimized for small code snippets, than can be procedurally created and rendered on the go. Pypond is not 
 optimized to create human-readable files, but rather the final result of said file in the preferred format.
 
+Among other things, Pypond is used in the interactive piece ["A Taste of Control"](https://github.com/tqmbanados/aTasteProgram)
+
 ### General Functionality
 
 Pypond uses python classes to represent different elements of Lilypond code. Some of the more important classes:
